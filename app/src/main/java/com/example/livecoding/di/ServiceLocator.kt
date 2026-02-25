@@ -4,6 +4,8 @@ import com.example.livecoding.data.remote.CardGameApi
 import com.example.livecoding.data.remote.CardGameRemoteDataSource
 import com.example.livecoding.data.repository.CardGameRepositoryImpl
 import com.example.livecoding.domain.repository.CardGameRepository
+import com.example.livecoding.domain.strategy.DealerStrategy
+import com.example.livecoding.domain.strategy.StandardDealerStrategy
 import com.example.livecoding.domain.usecase.DrawOpeningHandUseCase
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -31,8 +33,16 @@ object ServiceLocator {
         CardGameRepositoryImpl(remoteDataSource)
     }
 
+    private val dealerStrategy: DealerStrategy by lazy {
+        StandardDealerStrategy()
+    }
+
     fun provideDrawOpeningHandUseCase(): DrawOpeningHandUseCase {
         return DrawOpeningHandUseCase(repository)
+    }
+
+    fun provideDealerStrategy(): DealerStrategy {
+        return dealerStrategy
     }
 
     private fun provideOkHttpClient(): OkHttpClient {

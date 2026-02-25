@@ -15,7 +15,10 @@ import com.example.livecoding.ui.theme.LiveCodingTheme
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<com.example.livecoding.presentation.cards.CardsViewModel> {
-        CardsViewModelFactory(ServiceLocator.provideDrawOpeningHandUseCase())
+        CardsViewModelFactory(
+            ServiceLocator.provideDrawOpeningHandUseCase(),
+            ServiceLocator.provideDealerStrategy()
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
