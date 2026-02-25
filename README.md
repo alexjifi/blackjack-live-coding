@@ -1,4 +1,4 @@
-# Android Live Coding Challenge (Blackjack + AI Allowed)
+# Android Live Coding Challenge (Blackjack) - AI Tools Allowed
 
 Base project for Android interviews focused on **Kotlin + Compose + Clean Architecture** with real game business rules.
 
