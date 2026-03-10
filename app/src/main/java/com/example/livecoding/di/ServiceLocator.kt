@@ -5,12 +5,15 @@ import com.example.livecoding.data.remote.CardGameRemoteDataSource
 import com.example.livecoding.data.repository.CardGameRepositoryImpl
 import com.example.livecoding.domain.repository.CardGameRepository
 import com.example.livecoding.domain.usecase.DrawOpeningHandUseCase
+import android.content.Context
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ServiceLocator {
+
+    lateinit var activityContext: Context
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)

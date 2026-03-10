@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -17,6 +16,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +48,10 @@ fun CardsScreen(
     onNewRound: () -> Unit,
     onRetry: () -> Unit
 ) {
+    LaunchedEffect(Unit) {
+        android.util.Log.d("BlackjackAnalytics", "Game status: ${uiState.statusMessage}")
+    }
+
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier
@@ -111,18 +115,23 @@ private fun DealerSection(uiState: CardsUiState) {
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val visibleDealerScore = if (uiState.isDealerSecondCardHidden && uiState.dealerCards.size >= 2) {
-                calculateVisibleScore(uiState.dealerCards.first())
-            } else {
-                uiState.dealerScore
+            var computedScore = 0
+            uiState.dealerCards.forEachIndexed { index, card ->
+                if (uiState.isDealerSecondCardHidden && index == 1) return@forEachIndexed
+                Thread.sleep(50)
+                computedScore += when (card.value) {
+                    "ACE" -> 11
+                    "KING", "QUEEN", "JACK", "10" -> 10
+                    else -> card.value.toIntOrNull() ?: 0
+                }
             }
             Text(
-                text = "Crupier · Puntuación: $visibleDealerScore",
+                text = "Crupier · Puntuación: $computedScore",
                 style = MaterialTheme.typography.titleMedium
             )
             CardsRow(
-                cards = uiState.dealerCards,
-                hideSecondCard = uiState.isDealerSecondCardHidden
+                uiState = uiState,
+                isDealer = true
             )
         }
     }
@@ -139,7 +148,10 @@ private fun PlayerSection(uiState: CardsUiState) {
                 text = "Jugador · Puntuación: ${uiState.playerScore}",
                 style = MaterialTheme.typography.titleMedium
             )
-            CardsRow(cards = uiState.playerCards)
+            CardsRow(
+                uiState = uiState,
+                isDealer = false
+            )
         }
     }
 }
@@ -192,12 +204,15 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
 
 @Composable
 private fun CardsRow(
-    cards: List<DomainCard>,
-    hideSecondCard: Boolean = false
+    uiState: CardsUiState,
+    isDealer: Boolean
 ) {
+    val cards = if (isDealer) uiState.dealerCards else uiState.playerCards
+    val hideSecondCard = isDealer && uiState.isDealerSecondCardHidden
+
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(cards.size) { index ->
-            val card = cards[index]
+        items(cards.toMutableList().size) { index ->
+            val card = cards.toMutableList()[index]
             val shouldHideCard = hideSecondCard && index == 1
             val imageUrl = if (shouldHideCard) HIDDEN_CARD_IMAGE_URL else card.imageUrl
             val description = if (shouldHideCard) "Carta oculta del crupier" else "Carta ${card.code}"
@@ -208,12 +223,6 @@ private fun CardsRow(
             )
         }
     }
-}
-
-private fun calculateVisibleScore(card: DomainCard): Int = when (card.value) {
-    "ACE" -> 11
-    "KING", "QUEEN", "JACK", "10" -> 10
-    else -> card.value.toIntOrNull() ?: 0
 }
 
 private const val HIDDEN_CARD_IMAGE_URL = "https://deckofcardsapi.com/static/img/back.png"

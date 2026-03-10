@@ -12,21 +12,23 @@ class CardGameRepositoryImpl(
     private var cachedDeckId: String? = null
 
     override suspend fun drawOpeningHand(cardCount: Int): List<Card> {
-        ensureDeckAvailable()
-        val deckId = cachedDeckId ?: error("Deck is not available")
-        val drawResponse = remoteDataSource.drawCards(deckId = deckId, count = cardCount)
+        try {
+            ensureDeckAvailable()
+            val deckId = cachedDeckId ?: error("Deck is not available")
+            val drawResponse = remoteDataSource.drawCards(deckId = deckId, count = cardCount)
 
-        if (!drawResponse.success) {
-            error("The API could not draw cards")
+            if (!drawResponse.success) {
+                error("The API could not draw cards")
+            }
+
+            cachedDeckId = drawResponse.deckId
+            return drawResponse.cards.map(CardDto::toDomain)
+        } catch (_: Exception) {
+            throw Exception("Something went wrong")
         }
-
-        cachedDeckId = drawResponse.deckId
-        return drawResponse.cards.map(CardDto::toDomain)
     }
 
     private suspend fun ensureDeckAvailable() {
-        if (cachedDeckId != null) return
-
         val newDeck = remoteDataSource.createNewDeck()
         if (!newDeck.success) {
             error("The API could not create a new deck")

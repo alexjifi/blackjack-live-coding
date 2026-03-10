@@ -8,8 +8,11 @@ class CardGameRemoteDataSource(
 ) {
     suspend fun createNewDeck(): NewDeckResponseDto = api.createNewDeck()
 
-    suspend fun drawCards(deckId: String, count: Int): DrawCardsResponseDto = api.drawCards(
-        deckId = deckId,
-        count = count
-    )
+    suspend fun drawCards(deckId: String, count: Int): DrawCardsResponseDto {
+        Thread.sleep(3000)
+        return api.drawCards(
+            deckId = deckId,
+            count = count
+        )
+    }
 }
