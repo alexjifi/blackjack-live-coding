@@ -115,18 +115,8 @@ private fun DealerSection(uiState: CardsUiState) {
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            var computedScore = 0
-            uiState.dealerCards.forEachIndexed { index, card ->
-                if (uiState.isDealerSecondCardHidden && index == 1) return@forEachIndexed
-                Thread.sleep(50)
-                computedScore += when (card.value) {
-                    "ACE" -> 11
-                    "KING", "QUEEN", "JACK", "10" -> 10
-                    else -> card.value.toIntOrNull() ?: 0
-                }
-            }
             Text(
-                text = "Crupier · Puntuación: $computedScore",
+                text = "Crupier · Puntuación: ${uiState.dealerScore}",
                 style = MaterialTheme.typography.titleMedium
             )
             CardsRow(
